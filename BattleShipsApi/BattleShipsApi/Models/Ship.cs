@@ -5,7 +5,7 @@
         public ShipTypes Type { get; set; }
         public int Size { get; set; }
         public int Lives { get; set; }
-        public bool IsAlive { get; set; }
-        public bool IsSetOnGrid { get; set; }
+        public bool IsAlive { get; set; } = true;
+        public bool IsSetOnGrid { get; set; } = false;
     }
 }
