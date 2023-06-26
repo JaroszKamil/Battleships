@@ -1,2 +1,6 @@
 /BattleShipsApi/.vs
 /BattleShipsApi/BattleShipsApi/obj
+/BattleShipsTests/bin/Debug/net7.0
+/BattleShipsTests/obj/Debug/net7.0
+/BattleShipsTests/obj
+/BattleShipsApi/BattleShipsApi/bin/Debug/net7.0
