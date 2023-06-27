@@ -5,7 +5,7 @@ import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 
 const Item = styled(Paper)(({ theme, isOceanGrid, isTargetGrid  }) => ({
-  backgroundColor: isOceanGrid ? 'blue' : isTargetGrid ? 'green' : theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
+  backgroundColor: isOceanGrid ? 'blue' : isTargetGrid ? 'green' : '#fff',
   ...theme.typography.body2,
   padding: theme.spacing(1),
   textAlign: 'center',
@@ -17,14 +17,14 @@ const Item = styled(Paper)(({ theme, isOceanGrid, isTargetGrid  }) => ({
 
 class BattleShipsGrid extends React.Component {
   render() {
-    const letters = 'ABCDEFGHIJ'; // Letters to use in the grid
-    const rows = 11; // Number of rows
-    const columns = 11; // Number of columns
+    const letters = 'ABCDEFGHIJ';
+    const rows = 11;
+    const columns = 11;
 
     return (
         <div class="gameBoard">
           <h1>Battleships</h1>
-          <Box sx={{ flexGrow: 1, padding: '16px' }}>
+          <Box sx={{ padding: '16px' }}>
             <Grid container spacing={1} columns={columns}>
               {Array.from(Array(rows)).map((_, rowIndex) => (
                 <React.Fragment key={rowIndex}>
@@ -49,7 +49,7 @@ class BattleShipsGrid extends React.Component {
               ))}
             </Grid>
           </Box>
-          <Box sx={{ flexGrow: 1, padding: '16px' }}>
+          <Box sx={{padding: '16px' }}>
             <Grid container spacing={1} columns={columns}>
               {Array.from(Array(rows)).map((_, rowIndex) => (
                 <React.Fragment key={rowIndex}>
