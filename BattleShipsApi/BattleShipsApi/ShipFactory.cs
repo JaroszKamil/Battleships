@@ -11,15 +11,13 @@ namespace BattleShipsApi
                 ShipTypes.Battleship => new Ship()
                 {
                     Type = shipType,
-                    Size = 5,
-                    Lives = 5,
+                    Size = 5
 
                 },
                 ShipTypes.Destroyers => new Ship()
                 {
                     Type = shipType,
                     Size = 4,
-                    Lives = 4,
                 },
                 _ => throw new NotImplementedException()
             };

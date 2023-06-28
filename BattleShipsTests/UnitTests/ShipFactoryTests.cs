@@ -12,8 +12,7 @@ namespace BattleShipsApi.Tests.UnitTests
             {
                 Type = ShipTypes.Battleship,
                 IsAlive = true,
-                Size = 5,
-                Lives = 5,
+                Size = 5
             };
         }
 
