@@ -4,3 +4,6 @@
 /BattleShipsTests/obj/Debug/net7.0
 /BattleShipsTests/obj
 /BattleShipsApi/BattleShipsApi/bin/Debug/net7.0
+/battle_ships_web/node_modules/.bin
+/battle_ships_web/node_modules/.cache
+/battle_ships_web/node_modules
