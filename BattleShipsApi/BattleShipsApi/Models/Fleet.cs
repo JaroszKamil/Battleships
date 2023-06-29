@@ -1,4 +1,6 @@
-﻿namespace BattleShipsApi.Models
+﻿using BattleShipsApi.Models.ShipModels;
+
+namespace BattleShipsApi.Models
 {
     public class Fleet
     {

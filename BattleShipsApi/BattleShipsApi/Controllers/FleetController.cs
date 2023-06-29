@@ -18,9 +18,9 @@ namespace BattleShipsApi.Controllers
         public async Task<ActionResult<Fleet>> GetFleet()
         {
             // Call the QuizService to get the quizModel
-            var fleet = fleetManager.GetFleet();
+            //var fleet = fleetManager.GetFleet();
 
-            return fleet;
+            return null;
         }
     }
 }

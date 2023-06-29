@@ -6,19 +6,18 @@ namespace BattleShipsApi.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    public class BoardController: ControllerBase
+    public class GameplayController: ControllerBase
     {
-        private readonly IFleetManager fleetManager;
-        public BoardController(IFleetManager fleetManager)
+        private readonly IGameplayManager gameplay;
+        public GameplayController(IGameplayManager gameplay)
         {
-            this.fleetManager = fleetManager;
+            this.gameplay = gameplay;
         }
 
         [HttpGet]
         public async Task<ActionResult<Board>> StartGame()
         {
-            // Call the QuizService to get the quizModel
-            var board = fleetManager.SetFleetOnGrid();
+            var board = gameplay.PrepareTheBoard();
 
             return board;
         }

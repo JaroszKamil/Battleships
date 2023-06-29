@@ -1,4 +1,4 @@
-﻿namespace BattleShipsApi.Models
+﻿namespace BattleShipsApi.Models.ShipModels
 {
     public enum ShipTypes
     {

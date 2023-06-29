@@ -4,8 +4,8 @@ namespace BattleShipsApi.Services
 {
     public interface IFleetManager
     {
-        Board SetFleetOnGrid();
-        Fleet GetFleet();
+        List<GridCoordinates> SetShipsOnOceanGrid(Fleet fleet);
+        Fleet CreateFleet();
         bool Shoot();
     }
 }

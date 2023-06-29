@@ -1,4 +1,7 @@
-﻿namespace BattleShipsApi.Startup
+﻿using BattleShipsApi.Models;
+using BattleShipsApi.Services;
+
+namespace BattleShipsApi.Startup
 {
     public static partial class ServiceInitializer
     {
@@ -19,6 +22,8 @@
         private static void RegisterCustomDependencies(IServiceCollection services, IConfiguration configuration)
         {
             services.AddControllers();
+            services.AddScoped<IFleetManager, FleetManager>();
+            services.AddSingleton<Board>();
         }
     }
 }
