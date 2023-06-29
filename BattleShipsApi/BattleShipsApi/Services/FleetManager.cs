@@ -81,26 +81,29 @@ namespace BattleShipsApi.Services
 
         private bool CanPlaceShip(List<GridCoordinates> oceanGrid, GridCoordinates cell, int shipSize)
         {
-            if(cell.Column + shipSize > 9 &&
-               cell.Column - shipSize < 0 &&
-               cell.Row + shipSize > 9 &&
-               cell.Row - shipSize < 0)
+            int minColumn = cell.Column - shipSize;
+            int maxColumn = cell.Column + shipSize;
+            int minRow = cell.Row - shipSize;
+            int maxRow = cell.Row + shipSize;
+
+            // Check if any of the cells required for the ship placement are out of bounds
+            if (minColumn < 0 || maxColumn > 9 || minRow < 0 || maxRow > 9)
             {
                 return false;
             }
 
-            var targetCell = oceanGrid.Find(x => x.Column == cell.Column && x.Row == cell.Column);
-
-            if(targetCell is OceanCell)
+            for (int column = minColumn; column <= maxColumn; column++)
             {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+                for (int row = minRow; row <= maxRow; row++)
+                {
+                    var targetCell = oceanGrid.Find(x => x.Column == column && x.Row == row);
 
-            return true;
+                    if (!(targetCell is OceanCell))
+                    {
+                        return false;
+                    }
+                }
+            }
         }
 
         private List<GridCoordinates> SetShipOnGrid(Ship ship, List<GridCoordinates> oceanCells)
