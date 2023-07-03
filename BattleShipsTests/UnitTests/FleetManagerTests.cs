@@ -1,4 +1,5 @@
 ﻿using BattleShipsApi.Models;
+using BattleShipsApi.Models.ShipModels;
 using BattleShipsApi.Services;
 using FluentAssertions;
 
@@ -28,15 +29,24 @@ namespace BattleShipsApi.Tests.UnitTests
         {
             //Arrange
             var fleet = fleetManager.CreateFleet();
+            var aspectedShipsCells = fleet.Ships?.Sum(x => x.Type == ShipTypes.Battleship ? 5 : 4) ?? 0;
 
             //Act
             var gridCoordinates = fleetManager.SetShipsOnOceanGrid(fleet);
+            var ships = gridCoordinates.FindAll(x => x is GridCell<Ship>);
 
             //Assert
             fleet.Ships.Should().HaveCount(fleet.MaxAllowedPerShipType.Sum(x => x.Value));
             gridCoordinates.Should().HaveCount(100);
-            gridCoordinates[99].Column.Should().Be(9);
-            gridCoordinates[99].Row.Should().Be(9);
+            gridCoordinates.Should().Contain(x => x.Column == 0 && x.Row == 0);
+            gridCoordinates.Should().Contain(x => x.Column == 9 && x.Row == 0);
+            gridCoordinates.Should().Contain(x => x.Column == 0 && x.Row == 1);
+            gridCoordinates.Should().Contain(x => x.Column == 9 && x.Row == 1);
+            gridCoordinates.Should().Contain(x => x.Column == 9 && x.Row == 9);
+            gridCoordinates.Should().Contain(x => x.Column == 9 && x.Row == 9);
+            ships.Should().HaveCount(aspectedShipsCells);
+            fleet.Ships?.All(x => x.IsSetOnGrid).Should().BeTrue();
+            ships.Should().OnlyHaveUniqueItems(x => new { x.Row, x.Column });
         }
     }
 }

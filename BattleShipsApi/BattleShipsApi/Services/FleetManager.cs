@@ -1,11 +1,12 @@
 ﻿using BattleShipsApi.Models;
 using BattleShipsApi.Models.ShipModels;
-using System.Net;
 
 namespace BattleShipsApi.Services
 {
     public class FleetManager : IFleetManager
     {
+        private readonly Random random = new Random();
+
         public bool Shoot()
         {
             throw new NotImplementedException();
@@ -25,15 +26,10 @@ namespace BattleShipsApi.Services
             {
                 do
                 {
-                  var ble = SetShipOnGrid(ship, oceanCells);
+                    SetShipOnGrid(ship, oceanCells);
 
                 } while (ship.IsSetOnGrid != true);
             }
-
-            GridCell<Ship> shipCell = new GridCell<Ship>();
-
-            oceanCells.Add(shipCell);
-
 
             return oceanCells;
         }
@@ -59,110 +55,98 @@ namespace BattleShipsApi.Services
         private List<GridCoordinates> MakeEmptOcean()
         {
             var oceanGrid = new List<GridCoordinates>();
-            int index = 0;
+            int columns = 0;
+            int rows = 0;
             do
             {
                 oceanGrid.Add(new GridCell<OceanCell>()
                 {
-                    Row = index,
-                    Column = index
+                    Row = rows,
+                    Column = columns
                 });
 
-                if(index == 10)
+                if(columns == 9)
                 {
-                    index = 0;
+                    columns = 0;
+                    rows++;
+                    continue;
                 }
 
-                index++;
+                columns++;
             } while (oceanGrid.Count() != 100);
 
             return oceanGrid;
         }
 
-        private bool CanPlaceShip(List<GridCoordinates> oceanGrid, GridCoordinates cell, int shipSize)
+        private List<List<GridCoordinates>> GetPlacesToSetShip(List<GridCoordinates> oceanGrid, GridCoordinates cell, int shipSize)
         {
-            int minColumn = cell.Column - shipSize;
-            int maxColumn = cell.Column + shipSize;
-            int minRow = cell.Row - shipSize;
-            int maxRow = cell.Row + shipSize;
-
-            // Check if any of the cells required for the ship placement are out of bounds
-            if (minColumn < 0 || maxColumn > 9 || minRow < 0 || maxRow > 9)
+            var possiblePlaces = new List<List<GridCoordinates>>();
+            var directions = new List<Predicate<GridCoordinates>>
             {
-                return false;
-            }
+                x => x.Column >= cell.Column && x.Column < cell.Column + shipSize && cell.Row == x.Row, // right
+                x => x.Column <= cell.Column && x.Column > cell.Column - shipSize && cell.Row == x.Row, // left
+                x => x.Row >= cell.Row && x.Row < cell.Row + shipSize && cell.Column == x.Column, // up
+                x => x.Row <= cell.Row && x.Row > cell.Row - shipSize && cell.Column == x.Column, // down
+            };
 
-            for (int column = minColumn; column <= maxColumn; column++)
+            foreach (var direction in directions)
             {
-                for (int row = minRow; row <= maxRow; row++)
+                var cells = GetCoordinates(oceanGrid, shipSize, direction);
+
+                if (cells != null)
                 {
-                    var targetCell = oceanGrid.Find(x => x.Column == column && x.Row == row);
-
-                    if (!(targetCell is OceanCell))
-                    {
-                        return false;
-                    }
+                    possiblePlaces.Add(cells);
                 }
             }
+
+            return possiblePlaces;
+        }
+
+        private List<GridCoordinates>? GetCoordinates(List<GridCoordinates> oceanGrid, int shipSize, Predicate<GridCoordinates> condition)
+        {
+            var cells = oceanGrid.FindAll(condition);
+
+            if (cells.Any(x => x is GridCell<Ship>) || cells.Count() != shipSize)
+            {
+                return null;
+            }
+
+            else return cells;
         }
 
         private List<GridCoordinates> SetShipOnGrid(Ship ship, List<GridCoordinates> oceanCells)
         {
-            var randomCell = oceanCells[new Random().Next(oceanCells.Count)];
-
-
-            if(CanPlaceShip(oceanCells, randomCell, ship.Size))
+            while (!ship.IsSetOnGrid)
             {
-                List<GridCell<Ship>> shipCoordinates = new List<GridCell<Ship>>();
+                var randomCell = oceanCells[random.Next(oceanCells.Count)];
 
-                oceanCells.Add(shipCoordinates[0]);
+                var possiblePlacesToSetShip = GetPlacesToSetShip(oceanCells, randomCell, ship.Size);
 
+                if (possiblePlacesToSetShip.Any())
+                {
+                    var randomPosition = possiblePlacesToSetShip[random.Next(possiblePlacesToSetShip.Count)];
+
+                    UpdateOceanCellsWithShip(randomPosition, oceanCells, ship);
+
+                    ship.IsSetOnGrid = true;
+                }
             }
 
-
-
-            //Random random = new Random();
-            //bool isVertical = random.Next(2) == 0;
-
-            //string[] rows = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" };
-            //int row = Array.IndexOf(rows, cell.Row);  // Get the index of the row in the array
-            //int column = cell.Column - 1;  // Adjust the column number to a zero-based index
-
-            //List<GridCoordinates> shipCoordinates = new List<GridCoordinates>();
-
-            //for (int i = 0; i < ship.SizeOnGrid; i++)
-            //{
-            //    int currentRow = row;
-            //    int currentColumn = column;
-
-            //    if (isVertical)
-            //    {
-            //        currentRow += i;
-            //    }
-            //    else
-            //    {
-            //        currentColumn += i;
-            //    }
-
-            //    var coordinates = new GridCoordinates
-            //    {
-            //        Row = rows[currentRow],
-            //        Column = currentColumn + 1
-            //    };
-
-            //    shipCoordinates.Add(new GridCell<Ship>
-            //    {
-            //        CellContent = ship,
-            //        Row = coordinates.Row,
-            //        Column = coordinates.Column
-            //    });
-            //}
-
-            //ship.IsSetOnGrid = true;
-
-            return null;
+            return oceanCells;
         }
 
-
+        private void UpdateOceanCellsWithShip(List<GridCoordinates> shipPosition, List<GridCoordinates> oceanCells, Ship ship)
+        {
+            foreach (var cell in shipPosition)
+            {
+                var gridIndex = oceanCells.IndexOf(oceanCells.First(x => x.Column == cell.Column && x.Row == cell.Row));
+                oceanCells[gridIndex] = new GridCell<Ship>()
+                {
+                    CellContent = ship,
+                    Column = cell.Column,
+                    Row = cell.Row,
+                };
+            }
+        }
     }
 }
