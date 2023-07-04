@@ -7,20 +7,12 @@ namespace BattleShipsApi.Services
     {
         private readonly Random random = new Random();
 
-        public bool Shoot()
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<GridCoordinates> SetShipsOnOceanGrid(Fleet fleet )
+        public List<GridCoordinates> SetShipsOnOceanGrid(Fleet fleet, List<GridCoordinates> oceanCells)
         {
             if (fleet.Ships == null || fleet.Ships.Count == 0)
             {
                 throw new Exception("There are no ships in the fleet.");
             }
-
-            List<GridCoordinates> oceanCells = MakeEmptOcean();
-
 
             foreach (var ship in fleet.Ships)
             {
@@ -49,33 +41,6 @@ namespace BattleShipsApi.Services
             }
 
             return fleet;
-        }
-
-
-        private List<GridCoordinates> MakeEmptOcean()
-        {
-            var oceanGrid = new List<GridCoordinates>();
-            int columns = 0;
-            int rows = 0;
-            do
-            {
-                oceanGrid.Add(new GridCell<OceanCell>()
-                {
-                    Row = rows,
-                    Column = columns
-                });
-
-                if(columns == 9)
-                {
-                    columns = 0;
-                    rows++;
-                    continue;
-                }
-
-                columns++;
-            } while (oceanGrid.Count() != 100);
-
-            return oceanGrid;
         }
 
         private List<List<GridCoordinates>> GetPlacesToSetShip(List<GridCoordinates> oceanGrid, GridCoordinates cell, int shipSize)
@@ -129,6 +94,7 @@ namespace BattleShipsApi.Services
                     UpdateOceanCellsWithShip(randomPosition, oceanCells, ship);
 
                     ship.IsSetOnGrid = true;
+                    ship.SizeOnGrid = ship.Size;
                 }
             }
 
@@ -140,11 +106,13 @@ namespace BattleShipsApi.Services
             foreach (var cell in shipPosition)
             {
                 var gridIndex = oceanCells.IndexOf(oceanCells.First(x => x.Column == cell.Column && x.Row == cell.Row));
+
                 oceanCells[gridIndex] = new GridCell<Ship>()
                 {
                     CellContent = ship,
                     Column = cell.Column,
                     Row = cell.Row,
+                    OcenCellStatus = CellStatusEnum.ship,
                 };
             }
         }
