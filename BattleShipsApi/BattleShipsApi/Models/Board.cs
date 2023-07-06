@@ -4,6 +4,6 @@
     {
         public List<GridCoordinates> OceanGrid { get; set; }
         public List<GridCoordinates> TargetGrid { get; set; }
-        public Fleet PlayerFleet { get; set; }
+        public List<GridCoordinates> ComputerPossibleTargets { get; set; }
     }
 }

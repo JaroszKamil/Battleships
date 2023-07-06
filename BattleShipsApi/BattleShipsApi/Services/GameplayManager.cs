@@ -7,40 +7,53 @@ namespace BattleShipsApi.Services
     {
         IFleetManager fleetManager;
         Board board;
+        Random random= new Random();
         public GameplayManager(IFleetManager fleetManager, Board board)
         {
             this.fleetManager = fleetManager;
             this.board = board;
         }
 
-        public GridCoordinates ComputerShoot(GridCoordinates cell)
+        public GridCoordinates ComputerShoot(GridCoordinates? coordinates = null)
         {
-            throw new NotImplementedException();
+
+            if (board.ComputerPossibleTargets?.Count > 0)
+            {
+                var index = random.Next(this.board.ComputerPossibleTargets.Count);
+                coordinates = this.board.ComputerPossibleTargets[index];
+            }
+            else if(coordinates== null)
+            {
+                var index = random.Next(this.board.OceanGrid.Count);
+                coordinates = this.board.OceanGrid[index];
+            }
+
+            var result = Shoot(coordinates, this.board.OceanGrid);
+
+            if (result.OcenCellStatus == CellStatusEnum.hits)
+            {
+                var ship = (result as GridCell<Ship>).CellContent as Ship;
+
+                var possiblePlacesOfShip = fleetManager.CheckPossibleShipPlaces<GridCell<GridCoordinates>>(this.board.OceanGrid, coordinates, ship.Size);
+
+                if(possiblePlacesOfShip != null && possiblePlacesOfShip.Count() > 0)
+                {
+                    var randomPosition = possiblePlacesOfShip[random.Next(possiblePlacesOfShip.Count())];
+                    this.board.ComputerPossibleTargets = randomPosition;
+                }
+            
+            }
+            else if (result.OcenCellStatus == CellStatusEnum.sinks)
+            {
+                board.ComputerPossibleTargets.Clear();
+            }
+
+            return result;
         }
         public GridCoordinates PlayerShoot(GridCoordinates cell)
         {
-            var targetCell = this.board.TargetGrid.Find(x => x.Column == cell.Column && x.Row == cell.Row);
-
-            if(targetCell == null)
-            {
-                throw new Exception("There is no cell with that coordinates on the board");
-            }
-
-            if (targetCell is GridCell<Ship> ship)
-            {
-                ship.CellContent.SizeOnGrid--;
-                ship.OcenCellStatus = CellStatusEnum.hits;
-
-                if (ship.CellContent.SizeOnGrid == 0)
-                {
-                    ship.CellContent.IsAlive = false;
-                    ship.OcenCellStatus = CellStatusEnum.sinks;
-                }
-
-                return ship;
-            }
-
-            targetCell.OcenCellStatus = CellStatusEnum.misses;
+            var targetCell = Shoot(cell, this.board.TargetGrid);
+       
             return targetCell;
         }
 
@@ -85,6 +98,33 @@ namespace BattleShipsApi.Services
             } while (oceanGrid.Count() != 100);
 
             return oceanGrid;
+        }
+
+        private GridCoordinates Shoot(GridCoordinates cell, List<GridCoordinates> gridCoordinates)
+        {
+            var targetCell = gridCoordinates.Find(x => x.Column == cell.Column && x.Row == cell.Row);
+
+            if (targetCell == null)
+            {
+                throw new Exception("There is no cell with that coordinates on the board");
+            }
+
+            if (targetCell is GridCell<Ship> ship)
+            {
+                ship.CellContent.SizeOnGrid--;
+                ship.OcenCellStatus = CellStatusEnum.hits;
+
+                if (ship.CellContent.SizeOnGrid == 0)
+                {
+                    ship.CellContent.IsAlive = false;
+                    ship.OcenCellStatus = CellStatusEnum.sinks;
+                }
+
+                return ship;
+            }
+
+            targetCell.OcenCellStatus = CellStatusEnum.misses;
+            return targetCell;
         }
     }
 }

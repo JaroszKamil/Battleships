@@ -43,7 +43,7 @@ namespace BattleShipsApi.Services
             return fleet;
         }
 
-        private List<List<GridCoordinates>> GetPlacesToSetShip(List<GridCoordinates> oceanGrid, GridCoordinates cell, int shipSize)
+        public List<List<GridCoordinates>> CheckPossibleShipPlaces<T>(List<GridCoordinates> oceanGrid, GridCoordinates cell, int shipSize)
         {
             var possiblePlaces = new List<List<GridCoordinates>>();
             var directions = new List<Predicate<GridCoordinates>>
@@ -56,7 +56,7 @@ namespace BattleShipsApi.Services
 
             foreach (var direction in directions)
             {
-                var cells = GetCoordinates(oceanGrid, shipSize, direction);
+                var cells = GetCoordinates<T>(oceanGrid, shipSize, direction);
 
                 if (cells != null)
                 {
@@ -67,11 +67,11 @@ namespace BattleShipsApi.Services
             return possiblePlaces;
         }
 
-        private List<GridCoordinates>? GetCoordinates(List<GridCoordinates> oceanGrid, int shipSize, Predicate<GridCoordinates> condition)
+        private List<GridCoordinates>? GetCoordinates<T>(List<GridCoordinates> oceanGrid, int shipSize, Predicate<GridCoordinates> condition)
         {
             var cells = oceanGrid.FindAll(condition);
 
-            if (cells.Any(x => x is GridCell<Ship>) || cells.Count() != shipSize)
+            if (cells.Any(x => x is T || cells.Count() != shipSize))
             {
                 return null;
             }
@@ -85,11 +85,11 @@ namespace BattleShipsApi.Services
             {
                 var randomCell = oceanCells[random.Next(oceanCells.Count)];
 
-                var possiblePlacesToSetShip = GetPlacesToSetShip(oceanCells, randomCell, ship.Size);
+                var possiblePlacesToSetShip = CheckPossibleShipPlaces<GridCell<Ship>>(oceanCells, randomCell, ship.Size);
 
                 if (possiblePlacesToSetShip.Any())
                 {
-                    var randomPosition = possiblePlacesToSetShip[random.Next(possiblePlacesToSetShip.Count)];
+                    var randomPosition = possiblePlacesToSetShip[random.Next(possiblePlacesToSetShip.Count())];
 
                     UpdateOceanCellsWithShip(randomPosition, oceanCells, ship);
 

@@ -75,5 +75,49 @@ namespace BattleShipsApi.Tests.UnitTests
             //Assert
             act.Should().Throw<Exception>("There is no cell with that coordinates on the board");
         }
+
+        [Fact]
+        public void ComputerShoot_ShipCoordinates_ShouldSetComputerPossibleTargets()
+        {
+            //Arrange
+            var shipCoordinates = board.OceanGrid.OfType<GridCell<Ship>>().GroupBy(x => x.CellContent.ShipGuid).First();
+            var shipCell = shipCoordinates.First();
+            var aspectedShipOnGridSize = shipCell.As<GridCell<Ship>>().CellContent.As<Ship>().SizeOnGrid - 1;
+
+            //Act
+            var result = this.gameplayManager.ComputerShoot(shipCell);
+
+            var ship = result.As<GridCell<Ship>>().CellContent.As<Ship>();
+
+            //Assert
+            result.Should().BeOfType<GridCell<Ship>>();
+            this.board.ComputerPossibleTargets.Should().HaveCount(ship.Size);
+        }
+
+        [Fact]
+        public void ComputerShoot_AllShipCoordinates_ShouldSinkShip()
+        {
+            //Arrange
+            var shipCoordinates = board.OceanGrid.OfType<GridCell<Ship>>().GroupBy(x => x.CellContent.ShipGuid).First();
+            var shipCell = shipCoordinates.First();
+            var aspectedShipOnGridSize = shipCell.As<GridCell<Ship>>().CellContent.As<Ship>().SizeOnGrid - 1;
+
+            //Act
+            GridCoordinates? result = null;
+
+            shipCoordinates.ToList().ForEach(x =>
+            {
+                result = this.gameplayManager.ComputerShoot(shipCell);
+            });
+ 
+            var ship = result.As<GridCell<Ship>>().CellContent.As<Ship>();
+
+            //Assert
+            result.Should().BeOfType<GridCell<Ship>>();
+            this.board.ComputerPossibleTargets.Should().HaveCount(0);
+            result?.OcenCellStatus.Should().Be(CellStatusEnum.sinks);
+            ship.IsAlive.Should().BeFalse();
+            ship.SizeOnGrid.Should().Be(0);
+        }
     }
 }
