@@ -62,5 +62,18 @@ namespace BattleShipsApi.Tests.UnitTests
             ship.IsAlive.Should().BeFalse();
             ship.SizeOnGrid.Should().Be(0);
         }
+
+        [Fact]
+        public void PlayerShoot_NoCoordinates_ShipThrowException()
+        {
+            //Arrange
+            GridCoordinates shipCoordinates = null;
+
+            //Act
+            var act = () => this.gameplayManager.PlayerShoot(shipCoordinates);
+
+            //Assert
+            act.Should().Throw<Exception>("There is no cell with that coordinates on the board");
+        }
     }
 }

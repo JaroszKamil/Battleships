@@ -21,7 +21,7 @@ namespace BattleShipsApi
                     Type = shipType,
                     Size = 4,
                 },
-                _ => throw new NotImplementedException()
+                _ => throw new Exception("Wrong ship type")
             };
         }
     }

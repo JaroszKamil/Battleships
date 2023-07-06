@@ -51,5 +51,19 @@ namespace BattleShipsApi.Tests.UnitTests
             fleet.Ships?.All(x => x.IsSetOnGrid).Should().BeTrue();
             ships.Should().OnlyHaveUniqueItems(x => new { x.Row, x.Column });
         }
+
+        [Fact]
+        public void SetShipsOnOceanGrid_NoShipInAFleet_ShouldThrowError()
+        {
+            //Arrange
+            var fleet = fleetManager.CreateFleet();
+            fleet.Ships = null;
+
+            //Act
+            var act = () => fleetManager.SetShipsOnOceanGrid(fleet, oceanGrid);
+
+            //Assert
+            act.Should().Throw<Exception>().WithMessage("There are no ships in the fleet.");
+        }
     }
 }
