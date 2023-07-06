@@ -8,9 +8,12 @@ namespace BattleShipsApi.Tests.UnitTests
     public class FleetManagerTests
     {
         private FleetManager fleetManager;
+        private List<GridCoordinates> oceanGrid;
         public FleetManagerTests()
         {
             this.fleetManager = new FleetManager();
+            var gameManager = new GameplayManager(fleetManager, new Board());
+            oceanGrid = gameManager.MakeEmptOcean();
         }
 
 
@@ -32,7 +35,7 @@ namespace BattleShipsApi.Tests.UnitTests
             var aspectedShipsCells = fleet.Ships?.Sum(x => x.Type == ShipTypes.Battleship ? 5 : 4) ?? 0;
 
             //Act
-            var gridCoordinates = fleetManager.SetShipsOnOceanGrid(fleet);
+            var gridCoordinates = fleetManager.SetShipsOnOceanGrid(fleet, oceanGrid);
             var ships = gridCoordinates.FindAll(x => x is GridCell<Ship>);
 
             //Assert
@@ -47,6 +50,20 @@ namespace BattleShipsApi.Tests.UnitTests
             ships.Should().HaveCount(aspectedShipsCells);
             fleet.Ships?.All(x => x.IsSetOnGrid).Should().BeTrue();
             ships.Should().OnlyHaveUniqueItems(x => new { x.Row, x.Column });
+        }
+
+        [Fact]
+        public void SetShipsOnOceanGrid_NoShipInAFleet_ShouldThrowError()
+        {
+            //Arrange
+            var fleet = fleetManager.CreateFleet();
+            fleet.Ships = null;
+
+            //Act
+            var act = () => fleetManager.SetShipsOnOceanGrid(fleet, oceanGrid);
+
+            //Assert
+            act.Should().Throw<Exception>().WithMessage("There are no ships in the fleet.");
         }
     }
 }
