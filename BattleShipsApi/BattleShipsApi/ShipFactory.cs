@@ -1,4 +1,4 @@
-﻿using BattleShipsApi.Models;
+﻿using BattleShipsApi.Models.ShipModels;
 
 namespace BattleShipsApi
 {
@@ -10,16 +10,16 @@ namespace BattleShipsApi
             {
                 ShipTypes.Battleship => new Ship()
                 {
+                    ShipGuid = Guid.NewGuid(),
                     Type = shipType,
-                    Size = 5,
-                    Lives = 5,
+                    Size = 5
 
                 },
                 ShipTypes.Destroyers => new Ship()
                 {
+                    ShipGuid = Guid.NewGuid(),
                     Type = shipType,
                     Size = 4,
-                    Lives = 4,
                 },
                 _ => throw new NotImplementedException()
             };

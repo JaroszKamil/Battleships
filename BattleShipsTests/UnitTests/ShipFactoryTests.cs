@@ -1,4 +1,4 @@
-using BattleShipsApi.Models;
+using BattleShipsApi.Models.ShipModels;
 using FluentAssertions;
 
 namespace BattleShipsApi.Tests.UnitTests
@@ -12,8 +12,7 @@ namespace BattleShipsApi.Tests.UnitTests
             {
                 Type = ShipTypes.Battleship,
                 IsAlive = true,
-                Size = 5,
-                Lives = 5,
+                Size = 5
             };
         }
 
@@ -24,6 +23,7 @@ namespace BattleShipsApi.Tests.UnitTests
             ShipTypes shipType = ShipTypes.Battleship;
             //Act
             var ship = ShipFactory.GetShip(shipType);
+            ship.ShipGuid = new Guid();
             //Assert
             ship.Should().NotBeNull();
             ship.Should().BeEquivalentTo(aspectedShip);
