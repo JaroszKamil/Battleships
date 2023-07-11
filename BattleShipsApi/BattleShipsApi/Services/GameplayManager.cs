@@ -30,7 +30,7 @@ namespace BattleShipsApi.Services
 
             var result = Shoot(coordinates, this.board.OceanGrid);
 
-            if (result.OcenCellStatus == CellStatusEnum.hits)
+            if (result.CellStatus == CellStatusEnum.hits)
             {
                 var ship = (result as GridCell<Ship>).CellContent as Ship;
 
@@ -43,7 +43,7 @@ namespace BattleShipsApi.Services
                 }
             
             }
-            else if (result.OcenCellStatus == CellStatusEnum.sinks)
+            else if (result.CellStatus == CellStatusEnum.sinks)
             {
                 board.ComputerPossibleTargets.Clear();
             }
@@ -84,7 +84,7 @@ namespace BattleShipsApi.Services
                 {
                     Row = rows,
                     Column = columns,
-                    OcenCellStatus = CellStatusEnum.Ocean
+                    CellStatus = CellStatusEnum.Ocean
                 });
 
                 if (columns == 9)
@@ -112,18 +112,18 @@ namespace BattleShipsApi.Services
             if (targetCell is GridCell<Ship> ship)
             {
                 ship.CellContent.SizeOnGrid--;
-                ship.OcenCellStatus = CellStatusEnum.hits;
+                ship.CellStatus = CellStatusEnum.hits;
 
                 if (ship.CellContent.SizeOnGrid == 0)
                 {
                     ship.CellContent.IsAlive = false;
-                    ship.OcenCellStatus = CellStatusEnum.sinks;
+                    ship.CellStatus = CellStatusEnum.sinks;
                 }
 
                 return ship;
             }
 
-            targetCell.OcenCellStatus = CellStatusEnum.misses;
+            targetCell.CellStatus = CellStatusEnum.misses;
             return targetCell;
         }
     }

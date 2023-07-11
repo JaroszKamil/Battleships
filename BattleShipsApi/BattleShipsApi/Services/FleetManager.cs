@@ -1,11 +1,12 @@
 ﻿using BattleShipsApi.Models;
 using BattleShipsApi.Models.ShipModels;
+using System.Security.Cryptography;
 
 namespace BattleShipsApi.Services
 {
     public class FleetManager : IFleetManager
     {
-        private readonly Random random = new Random();
+        private Random random = new Random();
 
         public List<GridCoordinates> SetShipsOnOceanGrid(Fleet fleet, List<GridCoordinates> oceanCells)
         {
@@ -83,7 +84,7 @@ namespace BattleShipsApi.Services
         {
             while (!ship.IsSetOnGrid)
             {
-                var randomCell = oceanCells[random.Next(oceanCells.Count)];
+                var randomCell = oceanCells[random.Next(oceanCells.Count())];
 
                 var possiblePlacesToSetShip = CheckPossibleShipPlaces<GridCell<Ship>>(oceanCells, randomCell, ship.Size);
 
@@ -112,8 +113,20 @@ namespace BattleShipsApi.Services
                     CellContent = ship,
                     Column = cell.Column,
                     Row = cell.Row,
-                    OcenCellStatus = CellStatusEnum.ship,
+                    CellStatus = CellStatusEnum.ship,
                 };
+            }
+        }
+
+        static int GetRandomIndex<T>(List<T> list)
+        {
+            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
+            {
+                byte[] bytes = new byte[4];
+                rng.GetBytes(bytes);
+
+                int randomIndex = BitConverter.ToInt32(bytes, 0);
+                return Math.Abs(randomIndex) % list.Count;
             }
         }
     }

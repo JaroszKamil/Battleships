@@ -60,6 +60,7 @@ namespace BattleShipsApi.Tests.UnitTests
             fleet.Ships = null;
 
             //Act
+            var random = new Random();
             var act = () => fleetManager.SetShipsOnOceanGrid(fleet, oceanGrid);
 
             //Assert

@@ -19,6 +19,23 @@ namespace BattleShipsApi.Tests.UnitTests
         }
 
         [Fact]
+        public void PrepareTheBoard_ShouldReturnTwoDiffrentBoards()
+        {
+            //Arange
+            var oceanGrid = this.board.OceanGrid;
+            var ocenGridShips = this.board.OceanGrid.OfType<GridCell<Ship>>().GroupBy(x => x.CellContent.ShipGuid);
+
+            var targetGrid = this.board.TargetGrid;
+            var targetGridShips = this.board.TargetGrid.OfType<GridCell<Ship>>().GroupBy(x => x.CellContent.ShipGuid);
+
+            //Assert
+            oceanGrid.Should().NotBeEquivalentTo(targetGrid);
+            ocenGridShips.Should().HaveCountGreaterThan(1);
+            targetGridShips.Should().HaveCountGreaterThan(1);
+            ocenGridShips.Should().NotBeSameAs(targetGridShips);
+        }
+
+        [Fact]
         public void PlayerShoot_OnlyOneShipCoordinate_ShouldReturnShipWithOneHit()
         {
             //Arrange
@@ -33,7 +50,7 @@ namespace BattleShipsApi.Tests.UnitTests
 
             //Assert
             result.Should().BeOfType<GridCell<Ship>>();
-            result.OcenCellStatus.Should().Be(CellStatusEnum.hits);
+            result.CellStatus.Should().Be(CellStatusEnum.hits);
             ship.SizeOnGrid.Should().Be(aspectedShipOnGridSize);
             ship.IsAlive.Should().BeTrue();
         }
@@ -58,7 +75,7 @@ namespace BattleShipsApi.Tests.UnitTests
 
             //Assert
             result.Should().BeOfType<GridCell<Ship>>();
-            result?.OcenCellStatus.Should().Be(CellStatusEnum.sinks);
+            result?.CellStatus.Should().Be(CellStatusEnum.sinks);
             ship.IsAlive.Should().BeFalse();
             ship.SizeOnGrid.Should().Be(0);
         }
@@ -115,7 +132,7 @@ namespace BattleShipsApi.Tests.UnitTests
             //Assert
             result.Should().BeOfType<GridCell<Ship>>();
             this.board.ComputerPossibleTargets.Should().HaveCount(0);
-            result?.OcenCellStatus.Should().Be(CellStatusEnum.sinks);
+            result?.CellStatus.Should().Be(CellStatusEnum.sinks);
             ship.IsAlive.Should().BeFalse();
             ship.SizeOnGrid.Should().Be(0);
         }
