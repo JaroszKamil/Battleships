@@ -1,26 +1,19 @@
 ﻿using BattleShipsApi.Models;
 using BattleShipsApi.Models.ShipModels;
+using System.Security.Cryptography;
 
 namespace BattleShipsApi.Services
 {
     public class FleetManager : IFleetManager
     {
-        private readonly Random random = new Random();
+        private Random random = new Random();
 
-        public bool Shoot()
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<GridCoordinates> SetShipsOnOceanGrid(Fleet fleet )
+        public List<GridCoordinates> SetShipsOnOceanGrid(Fleet fleet, List<GridCoordinates> oceanCells)
         {
             if (fleet.Ships == null || fleet.Ships.Count == 0)
             {
                 throw new Exception("There are no ships in the fleet.");
             }
-
-            List<GridCoordinates> oceanCells = MakeEmptOcean();
-
 
             foreach (var ship in fleet.Ships)
             {
@@ -51,34 +44,7 @@ namespace BattleShipsApi.Services
             return fleet;
         }
 
-
-        private List<GridCoordinates> MakeEmptOcean()
-        {
-            var oceanGrid = new List<GridCoordinates>();
-            int columns = 0;
-            int rows = 0;
-            do
-            {
-                oceanGrid.Add(new GridCell<OceanCell>()
-                {
-                    Row = rows,
-                    Column = columns
-                });
-
-                if(columns == 9)
-                {
-                    columns = 0;
-                    rows++;
-                    continue;
-                }
-
-                columns++;
-            } while (oceanGrid.Count() != 100);
-
-            return oceanGrid;
-        }
-
-        private List<List<GridCoordinates>> GetPlacesToSetShip(List<GridCoordinates> oceanGrid, GridCoordinates cell, int shipSize)
+        public List<List<GridCoordinates>> CheckPossibleShipPlaces<T>(List<GridCoordinates> oceanGrid, GridCoordinates cell, int shipSize)
         {
             var possiblePlaces = new List<List<GridCoordinates>>();
             var directions = new List<Predicate<GridCoordinates>>
@@ -91,7 +57,7 @@ namespace BattleShipsApi.Services
 
             foreach (var direction in directions)
             {
-                var cells = GetCoordinates(oceanGrid, shipSize, direction);
+                var cells = GetCoordinates<T>(oceanGrid, shipSize, direction);
 
                 if (cells != null)
                 {
@@ -102,11 +68,11 @@ namespace BattleShipsApi.Services
             return possiblePlaces;
         }
 
-        private List<GridCoordinates>? GetCoordinates(List<GridCoordinates> oceanGrid, int shipSize, Predicate<GridCoordinates> condition)
+        private List<GridCoordinates>? GetCoordinates<T>(List<GridCoordinates> oceanGrid, int shipSize, Predicate<GridCoordinates> condition)
         {
             var cells = oceanGrid.FindAll(condition);
 
-            if (cells.Any(x => x is GridCell<Ship>) || cells.Count() != shipSize)
+            if (cells.Any(x => x is T || cells.Count() != shipSize))
             {
                 return null;
             }
@@ -118,17 +84,18 @@ namespace BattleShipsApi.Services
         {
             while (!ship.IsSetOnGrid)
             {
-                var randomCell = oceanCells[random.Next(oceanCells.Count)];
+                var randomCell = oceanCells[random.Next(oceanCells.Count())];
 
-                var possiblePlacesToSetShip = GetPlacesToSetShip(oceanCells, randomCell, ship.Size);
+                var possiblePlacesToSetShip = CheckPossibleShipPlaces<GridCell<Ship>>(oceanCells, randomCell, ship.Size);
 
                 if (possiblePlacesToSetShip.Any())
                 {
-                    var randomPosition = possiblePlacesToSetShip[random.Next(possiblePlacesToSetShip.Count)];
+                    var randomPosition = possiblePlacesToSetShip[random.Next(possiblePlacesToSetShip.Count())];
 
                     UpdateOceanCellsWithShip(randomPosition, oceanCells, ship);
 
                     ship.IsSetOnGrid = true;
+                    ship.SizeOnGrid = ship.Size;
                 }
             }
 
@@ -140,12 +107,26 @@ namespace BattleShipsApi.Services
             foreach (var cell in shipPosition)
             {
                 var gridIndex = oceanCells.IndexOf(oceanCells.First(x => x.Column == cell.Column && x.Row == cell.Row));
+
                 oceanCells[gridIndex] = new GridCell<Ship>()
                 {
                     CellContent = ship,
                     Column = cell.Column,
                     Row = cell.Row,
+                    CellStatus = CellStatusEnum.ship,
                 };
+            }
+        }
+
+        static int GetRandomIndex<T>(List<T> list)
+        {
+            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
+            {
+                byte[] bytes = new byte[4];
+                rng.GetBytes(bytes);
+
+                int randomIndex = BitConverter.ToInt32(bytes, 0);
+                return Math.Abs(randomIndex) % list.Count;
             }
         }
     }

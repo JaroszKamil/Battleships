@@ -50,7 +50,7 @@ namespace BattleShipsApi.Tests.UnitTests
             //Act
             Action act = () => ShipFactory.GetShip(shipType);
             //Assert
-            Assert.Throws<NotImplementedException>(act);
+            Assert.Throws<Exception>(act).Message.Should().Be("Wrong ship type");
         }
 
         public void Dispose()

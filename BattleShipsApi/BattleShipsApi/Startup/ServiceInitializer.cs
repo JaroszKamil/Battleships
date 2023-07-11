@@ -23,6 +23,7 @@ namespace BattleShipsApi.Startup
         {
             services.AddControllers();
             services.AddScoped<IFleetManager, FleetManager>();
+            services.AddScoped<IGameplayManager, GameplayManager>();
             services.AddSingleton<Board>();
         }
     }

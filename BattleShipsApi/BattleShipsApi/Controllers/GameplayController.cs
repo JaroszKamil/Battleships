@@ -15,9 +15,26 @@ namespace BattleShipsApi.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<Board>> StartGame()
+        public ActionResult<Board> StartGame()
         {
             var board = gameplay.PrepareTheBoard();
+
+            return board;
+        }
+
+        [HttpPut("shoot/player")]
+        public ActionResult<GridCoordinates> PlayerShoot(GridCoordinates cell)
+        {
+            var board = gameplay.PlayerShoot(cell);
+
+            return board;
+        }
+
+
+        [HttpPut("shoot/computer")]
+        public ActionResult<GridCoordinates> ComputerShoot()
+        {
+            var board = gameplay.ComputerShoot();
 
             return board;
         }
